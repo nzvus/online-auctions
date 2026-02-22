@@ -35,12 +35,11 @@ Here is a glimpse of the ria application's user interface (the pure html is quit
 |:---:|:---:|
 | <img src="documentation/screenshots/login.png" alt="Login" width="300"/> | <img src="documentation/screenshots/buy_page.png" alt="Find Auctions" width="500"/> |
 
-<br>
 
-**Sell Your Items (Dashboard)**
-<p align="center">
-  <img src="documentation/screenshots/sell_page.png" alt="Sell Page Dashboard" width="800"/>
-</p>
+| Sell your items (Sell Page) | See Auctions (Detail Page) |
+|:---:|:---:|
+| <img src="documentation/screenshots/sell_page.png" alt="Sell Page " width="500"/> | <img src="documentation/screenshots/auction_detail_page.png" alt="See Auctions" width="500"/> |
+
 
 ## 🛠️ Tech Stack
 
