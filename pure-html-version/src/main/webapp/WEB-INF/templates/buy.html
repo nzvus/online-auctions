@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Buy Page - Online Auctions</title>
+    <!-- Link to the shared stylesheet. -->
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/style.css}" />
+</head>
+<body>
+<!-- Main container for the page content. -->
+<div class="container">
+    <!--
+      Page header with title and user navigation.
+      The 'user-info' div is conditionally rendered if the user is logged in.
+    -->
+    <header>
+        <h1>Find Auctions</h1>
+        <div class="user-info" th:if="${session.user != null}">
+            Welcome, <span th:text="${session.user.name()}">User</span>!
+            <nav>
+                <a th:href="@{/HomeServlet}">Home</a>
+                <a th:href="@{/SellPageServlet}">Sell</a>
+                <a th:href="@{/LogoutServlet}">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content area for the Buy page. -->
+    <main>
+        <!--
+          Display area for error messages.
+          Conditionally shown if 'errorMessage' is present in the context.
+        -->
+        <p th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></p>
+        <!--
+          Display area for success messages.
+          Conditionally shown if 'successMessage' is present in the context.
+        -->
+        <p th:if="${successMessage}" class="success-message" th:text="${successMessage}"></p>
+
+        <!--
+          Section for the auction search form.
+          Allows users to search for open auctions using a keyword.
+        -->
+        <section class="search-form">
+            <h2>Search Open Auctions</h2>
+            <!--
+              Search form.
+              - 'action': Submits to BuyPageServlet to process the search.
+              - 'method': GET, as search parameters are suitable for URL.
+            -->
+            <form action="BuyPageServlet" method="GET">
+                <div>
+                    <label for="keyword">Keyword:</label>
+                    <!--
+                      Keyword input field.
+                      'th:value="${keyword}"': Pre-fills the input with the current keyword, if any (e.g., from a previous search).
+                    -->
+                    <input type="text" id="keyword" name="keyword" th:value="${keyword}" />
+                </div>
+                <div>
+                    <input type="submit" value="Search" />
+                </div>
+            </form>
+        </section>
+
+        <!--
+          Section to display search results.
+          This section is shown if a 'keyword' was provided and is not empty,
+          indicating a search was performed.
+        -->
+        <section class="auction-list" th:if="${keyword != null and not #strings.isEmpty(keyword)}">
+            <!-- Dynamically set the heading based on the search keyword. -->
+            <h2 th:text="|Search Results for '${keyword}'|">Search Results</h2>
+            <p>(Ordered by time remaining to deadline, most urgent first)</p>
+            <!--
+              Conditional display for when no search results are found.
+              'th:if="${searchResults == null or searchResults.isEmpty()}"': Checks if the searchResults list is null or empty.
+            -->
+            <div th:if="${searchResults == null or searchResults.isEmpty()}">
+                <p>No open auctions found matching your criteria.</p>
+            </div>
+            <!--
+              Table to display search results.
+              'th:if="${not (searchResults == null or searchResults.isEmpty())}"': Renders the table only if there are search results.
+            -->
+            <table th:if="${not (searchResults == null or searchResults.isEmpty())}">
+                <thead>
+                    <tr>
+                        <th>Auction ID</th>
+                        <th>Items (Name and Code)</th>
+                        <th>Time Remaining</th>
+                        <!-- No "View Offer" column, rows will be clickable. -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--
+                      Iterate over each auction in the 'searchResults' list.
+                      'th:each="auction : ${searchResults}"': Thymeleaf loop.
+                      'th:onclick': Makes the entire row clickable, navigating to the OfferPageServlet for the specific auction.
+                                    The URL is dynamically constructed using '@{}'.
+                    -->
+                    <tr th:each="auction : ${searchResults}"
+                        th:onclick="'window.location.href=\'' + @{/OfferPageServlet(auctionId=${auction.id()})} + '\''"
+                        style="cursor: pointer;">
+                        <td th:text="${auction.id()}">1</td>
+                        <td>
+                            <!--
+                              Display a list of items within the auction.
+                              Uses 'itemDAO.findItemsByAuctionId()' to fetch items dynamically.
+                              This demonstrates calling DAO methods from within a Thymeleaf template (requires DAO to be in context).
+                            -->
+                            <ul>
+                                <li th:each="item : ${itemDAO.findItemsByAuctionId(auction.id())}"
+                                    th:text="${item.name()} + ' (Code: ' + ${item.itemCode()} + ')'">
+                                    Item Name (Code: CODE) <!-- Placeholder for design view. -->
+                                </li>
+                                 <!-- Message if an auction somehow has no items (should be rare if creation is validated). -->
+                                 <li th:if="${itemDAO.findItemsByAuctionId(auction.id()).isEmpty()}">
+                                    No items listed for this auction
+                                </li>
+                            </ul>
+                        </td>
+                        <!--
+                          Display time remaining for the auction.
+                          Uses 'dateTimeUtils.getTimeRemaining()' with 'loginTimestamp' and auction's deadline.
+                        -->
+                        <td th:text="${dateTimeUtils.getTimeRemaining(loginTimestamp, auction.deadline())}">Time left</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!--
+          Section to display auctions won by the current user.
+        -->
+        <section class="won-auctions-list">
+            <h2>Your Won Auctions</h2>
+            <!-- Conditional display for when the user has not won any auctions. -->
+            <div th:if="${wonAuctions == null or wonAuctions.isEmpty()}">
+                <p>You have not won any auctions yet.</p>
+            </div>
+            <!-- Table to display won auctions. -->
+            <table th:if="${not (wonAuctions == null or wonAuctions.isEmpty())}">
+                <thead>
+                    <tr>
+                        <th>Auction ID</th>
+                        <th>Items (Name and Code)</th>
+                        <th>Winning Price</th>
+                        <!-- Removed "View Details" header, rows will be clickable. -->
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--
+                      Iterate over each auction in the 'wonAuctions' list.
+                      'th:onclick': Makes the row clickable, navigating to AuctionDetailServlet for the specific auction.
+                    -->
+                     <tr th:each="auction : ${wonAuctions}"
+                         th:onclick="'window.location.href=\'' + @{/AuctionDetailServlet(auctionId=${auction.id()})} + '\''"
+                         style="cursor: pointer;">
+                        <td th:text="${auction.id()}">3</td>
+                        <td>
+                            <ul>
+                                <li th:each="item : ${itemDAO.findItemsByAuctionId(auction.id())}"
+                                    th:text="${item.name()} + ' (Code: ' + ${item.itemCode()} + ')'">
+                                    Item Name (Code: CODE) <!-- Placeholder. -->
+                                </li>
+                                 <li th:if="${itemDAO.findItemsByAuctionId(auction.id()).isEmpty()}">
+                                    No items listed for this auction
+                                </li>
+                            </ul>
+                        </td>
+                        <!--
+                          Display the winning price, formatted to two decimal places.
+                          '#numbers.formatDecimal()': Thymeleaf utility for number formatting.
+                        -->
+                        <td th:text="'€' + ${#numbers.formatDecimal(auction.winningPrice(),1,2,'COMMA')}">€0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div> <!-- End of container -->
+</body>
+</html>

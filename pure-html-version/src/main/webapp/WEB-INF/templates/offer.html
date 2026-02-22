@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Place Bid - Online Auctions</title>
+    <!-- Link to the shared stylesheet. -->
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/style.css}" />
+</head>
+<body>
+<!-- Main container for the page content. -->
+<div class="container">
+    <!-- Page header with title and user navigation. -->
+    <header>
+        <h1>Place a Bid</h1>
+        <div class="user-info" th:if="${session.user != null}">
+            Welcome, <span th:text="${session.user.name()}">User</span>!
+            <nav>
+                <a th:href="@{/HomeServlet}">Home</a>
+                <a th:href="@{/SellPageServlet}">Sell</a>
+                <a th:href="@{/BuyPageServlet}">Buy</a>
+                <a th:href="@{/LogoutServlet}">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content area for the offer page. -->
+    <main>
+        <!-- Display area for error messages. -->
+        <p th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></p>
+        <!-- Display area for success messages. -->
+        <p th:if="${successMessage}" class="success-message" th:text="${successMessage}"></p>
+
+        <!--
+          This div contains details of the auction being bid on.
+          It's rendered only if an 'auction' object is present in the context
+          (which also implies the auction is valid for bidding by the current user).
+          'th:if="${auction != null}"'
+        -->
+        <div th:if="${auction != null}">
+            <!-- Card displaying general auction information. -->
+            <section class="auction-info-card">
+                <h2>Auction Information</h2>
+                <p><strong>Auction ID:</strong> <span th:text="${auction.id()}">123</span></p>
+                <p><strong>Status:</strong> <span th:text="${auction.status().name()}">OPEN</span></p>
+                <p><strong>Initial Price:</strong> €<span th:text="${#numbers.formatDecimal(auction.initialPrice(),1,2,'COMMA')}">100.00</span></p>
+                <p><strong>Minimum Bid Increment:</strong> €<span th:text="${#numbers.formatDecimal(auction.minimumBidIncrement(),1,0,'COMMA')}">5</span></p>
+                <p><strong>Deadline:</strong> <span th:text="${#temporals.format(auction.getDeadlineAsLocalDateTime(), 'dd-MM-yyyy HH:mm')}">dd-MM-yyyy HH:mm</span></p>
+                <p><strong>Time Remaining (from your login):</strong> <span th:text="${dateTimeUtils.getTimeRemaining(loginTimestamp, auction.deadline())}">Time left</span></p>
+                <p><strong>Created by:</strong> <span th:text="${userDAO.findUserById(auction.creatorUserId()) != null ? userDAO.findUserById(auction.creatorUserId()).username() : 'Unknown'}">CreatorUsername</span></p>
+            </section>
+
+            <!-- Card displaying items in the auction. -->
+            <section class="items-card">
+                <h2>Items in this Auction</h2>
+                <table th:if="${not (itemsInAuction == null or itemsInAuction.isEmpty())}" class="item-table-details">
+                    <thead>
+                    <tr>
+                        <th>Item Code</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Image</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${itemsInAuction}">
+                        <td th:text="${item.itemCode()}">ITM001</td>
+                        <td th:text="${item.name()}">Sample Item</td>
+                        <td class="item-description" th:text="${item.description()}">Description</td>
+                        <td>
+                            <img th:if="${item.image() != null and item.image().length > 0}"
+                                 th:src="'data:image/jpeg;base64,' + ${item.getBase64Image()}"
+                                 alt="Item Image"
+                                 class="item-thumbnail"/>
+                            <span th:unless="${item.image() != null and item.image().length > 0}">No Image</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                 <div th:if="${itemsInAuction == null or itemsInAuction.isEmpty()}">
+                    <p>No items found for this auction.</p>
+                </div>
+            </section>
+
+            <!-- Card displaying current bids on the auction. -->
+            <section class="bids-card">
+                <h2>Current Bids</h2>
+                <div th:if="${bidsForAuction == null or bidsForAuction.isEmpty()}">
+                    <p>No bids have been placed yet for this auction.</p>
+                </div>
+                <table th:if="${not (bidsForAuction == null or bidsForAuction.isEmpty())}">
+                    <thead>
+                    <tr>
+                        <th>Bidder</th>
+                        <th>Amount</th>
+                        <th>Timestamp</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="bid : ${bidsForAuction}">
+                        <td th:text="${bidderUsernames.get(bid.userId())}">UserX</td>
+                        <td th:text="'€' + ${#numbers.formatDecimal(bid.amount(),1,2,'COMMA')}">€105.00</td>
+                        <td th:text="${#temporals.format(bid.getTimestampAsLocalDateTime(), 'dd-MM-yyyy HH:mm:ss')}">dd-MM-yyyy HH:mm:ss</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <!--
+              Action card for placing a bid.
+              This section is displayed if the auction is OPEN, not created by the current user,
+              and the deadline has not passed.
+              'th:if="${auction.status().name() == 'OPEN' and auction.creatorUserId() != session.user.id() and auction.deadline().after(new java.sql.Timestamp(new java.util.Date().getTime()))}"'
+            -->
+            <section class="action-card" th:if="${auction.status().name() == 'OPEN' and auction.creatorUserId() != session.user.id() and auction.deadline().after(new java.sql.Timestamp(new java.util.Date().getTime()))}">
+                <h2>Place Your Bid</h2>
+                <!--
+                  Form to submit a new bid.
+                  - 'action': Submits to PlaceBidServlet.
+                  - 'method': POST.
+                -->
+                <form action="PlaceBidServlet" method="POST">
+                    <!-- Hidden field to pass the auction ID. -->
+                    <input type="hidden" name="auctionId" th:value="${auction.id()}" />
+                    <div>
+                        <label for="bidAmount">Your Bid (€):</label>
+                        <!--
+                          Number input for the bid amount.
+                          'min="0.01" step="0.01"': Allows decimal values for cents.
+                          'th:attr="min=..."': Dynamically sets the minimum allowed bid based on the current highest bid or initial price.
+                        -->
+                        <input type="number" id="bidAmount" name="bidAmount" min="0.01" step="0.01" required="required"
+                               th:attr="min=${highestBid != null ? highestBid.amount() + auction.minimumBidIncrement() : auction.initialPrice()}" />
+                        <!--
+                          Informational messages to guide the user on the minimum bid.
+                          One message is shown if there's a highest bid, another if it's the first bid.
+                        -->
+                        <small th:if="${highestBid != null}" th:text="'Current highest bid: €' + ${#numbers.formatDecimal(highestBid.amount(),1,2,'COMMA')} + '. Your bid must be at least €' + ${#numbers.formatDecimal(highestBid.amount() + auction.minimumBidIncrement(),1,2,'COMMA')}"></small>
+                        <small th:if="${highestBid == null}" th:text="'Starting price: €' + ${#numbers.formatDecimal(auction.initialPrice(),1,2,'COMMA')} + '. Your bid must be at least this amount.'"></small>
+                    </div>
+                    <div>
+                        <input type="submit" value="Place Bid" />
+                    </div>
+                </form>
+            </section>
+            <!--
+              Message displayed if bidding is not currently available for this auction
+              (e.g., auction is not open, user is creator, or deadline has passed).
+              This 'th:if' complements the one for the bid form.
+            -->
+             <div th:if="${auction.status().name() != 'OPEN' or auction.creatorUserId() == session.user.id() or auction.deadline().before(new java.sql.Timestamp(new java.util.Date().getTime()))}">
+                <p>Bidding is not currently available for this auction.</p>
+            </div>
+        </div> <!-- End of auction details div -->
+
+        <!--
+          Message displayed if the auction could not be loaded and no specific error message was set.
+        -->
+        <div th:if="${auction == null and errorMessage == null}">
+             <p class="error-message">Auction details could not be loaded or auction does not exist.</p>
+        </div>
+
+        <!-- Navigation link to go back to the Buy Page. -->
+        <p><a th:href="@{/BuyPageServlet}" class="button-link secondary">Back to Buy Page</a></p>
+        <!--
+          Removed: Back to Auction Details link, as this page already shows auction details.
+          A direct link to AuctionDetailServlet might be redundant or confusing from the Offer page itself.
+          Users can navigate back to BuyPage and then to AuctionDetail for auctions they own or won auctions.
+        -->
+    </main>
+
+</div> <!-- End of container -->
+</body>
+</html>

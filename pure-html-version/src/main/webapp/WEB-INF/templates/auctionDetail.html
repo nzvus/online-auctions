@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Auction Details - Online Auctions</title>
+    <!-- Link to the shared stylesheet. -->
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/style.css}" />
+</head>
+<body>
+<div class="container">
+
+    <header>
+        <h1>Auction Details</h1>
+        <div class="user-info" th:if="${session.user != null}">
+            Welcome, <span th:text="${session.user.name()}">User</span>!
+            <nav>
+                <a th:href="@{/HomeServlet}">Home</a>
+                <a th:href="@{/SellPageServlet}">Sell Page</a>
+                <a th:href="@{/BuyPageServlet}">Buy Page</a>
+                <a th:href="@{/LogoutServlet}">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Display area for error messages. -->
+        <p th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></p>
+        <!-- Display area for success messages. -->
+        <p th:if="${successMessage}" class="success-message" th:text="${successMessage}"></p>
+
+        <div th:if="${auction != null}" class="auction-details-grid">
+            <!--
+              Card displaying general auction information.
+            -->
+            <section class="auction-info-card">
+                <h2>Auction Information</h2>
+                 <p><strong>Auction ID:</strong> <span th:text="${auction.id()}">123</span></p>
+                <p><strong>Status:</strong> <span th:text="${auction.status().name()}">OPEN</span></p>
+                <p><strong>Initial Price:</strong> €<span th:text="${#numbers.formatDecimal(auction.initialPrice(),1,2,'COMMA')}">100.00</span></p>
+                <p><strong>Minimum Bid Increment:</strong> €<span th:text="${#numbers.formatDecimal(auction.minimumBidIncrement(),1,0,'COMMA')}">5</span></p>
+                <p><strong>Deadline:</strong> <span th:text="${#temporals.format(auction.getDeadlineAsLocalDateTime(), 'dd-MM-yyyy HH:mm')}">dd-MM-yyyy HH:mm</span></p>
+                <p><strong>Time Remaining (from your login):</strong> <span th:text="${dateTimeUtils.getTimeRemaining(loginTimestamp, auction.deadline())}">Time left</span></p>
+                <p><strong>Created by:</strong> <span th:text="${userDAO.findUserById(auction.creatorUserId()) != null ? userDAO.findUserById(auction.creatorUserId()).username() : 'Unknown'}">CreatorUsername</span></p>
+            </section>
+
+
+            <section class="items-card">
+                <h2>Items in this Auction</h2>
+                <div th:if="${itemsInAuction == null or itemsInAuction.isEmpty()}">
+                    <p>No items found for this auction.</p>
+                </div>
+                <table th:if="${not (itemsInAuction == null or itemsInAuction.isEmpty())}" class="item-table-details">
+                    <thead>
+                        <tr>
+                            <th>Item Code</th>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Image</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${itemsInAuction}">
+                            <td th:text="${item.itemCode()}">ITM001</td>
+                            <td th:text="${item.name()}">Sample Item</td>
+                            <td class="item-description" th:text="${item.description()}">Description</td>
+                            <td>
+                                <!-- Display item image if available, otherwise show "No Image". -->
+                                <img th:if="${item.image() != null and item.image().length > 0}"
+                                     th:src="'data:image/jpeg;base64,' + ${item.getBase64Image()}"
+                                     alt="Item Image"
+                                     class="item-thumbnail"/>
+                                <span th:unless="${item.image() != null and item.image().length > 0}">No Image</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+
+            <section class="bids-card">
+                <h2>Bids</h2>
+                <div th:if="${bidsForAuction == null or bidsForAuction.isEmpty()}">
+                    <p>No bids have been placed yet for this auction.</p>
+                </div>
+                <table th:if="${not (bidsForAuction == null or bidsForAuction.isEmpty())}">
+                    <thead>
+                        <tr>
+                            <th>Bidder</th>
+                            <th>Amount</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="bid : ${bidsForAuction}">
+                            <td th:text="${bidderUsernames.get(bid.userId())}">UserX</td>
+                            <td th:text="'€' + ${#numbers.formatDecimal(bid.amount(),1,2,'COMMA')}">€105.00</td>
+                            <td th:text="${#temporals.format(bid.getTimestampAsLocalDateTime(), 'dd-MM-yyyy HH:mm:ss')}">dd-MM-yyyy HH:mm:ss</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div th:if="${highestBid != null}">
+                    <p><strong>Current Highest Bid:</strong> €<span th:text="${#numbers.formatDecimal(highestBid.amount(),1,2,'COMMA')}"></span>
+                    by <span th:text="${bidderUsernames.get(highestBid.userId())}"></span></p>
+                </div>
+            </section>
+            
+
+            <section class="action-card" th:if="${auction.status().name() == 'OPEN' and auction.creatorUserId() == session.user.id()}">
+                <h2>Close Auction</h2>
+
+                 <form action="CloseAuctionServlet" method="POST" th:if="${auction.deadline().before(new java.sql.Timestamp(new java.util.Date().getTime()))}">
+                    <input type="hidden" name="auctionId" th:value="${auction.id()}" />
+                    <p>The deadline has passed. You can now close this auction.</p>
+                    <div>
+                        <input type="submit" value="Close Auction" class="danger"/>
+                    </div>
+                </form>
+                <p th:if="${auction.deadline().after(new java.sql.Timestamp(new java.util.Date().getTime()))}">
+                    The auction deadline has not yet passed. You can close it after the deadline.
+                </p>
+            </section>
+
+
+            <section class="winner-card" th:if="${auction.status().name() == 'CLOSED'}">
+                 <h2>Auction Closed</h2>
+                  <!-- Display winner details if a winner exists. -->
+                  <div th:if="${winner != null}">
+                     <p><strong>Winner Username:</strong> <span th:text="${winner.username()}">Winner Username</span></p>
+                     <p><strong>Winner Name:</strong> <span th:text="${winner.name()} + ' ' + ${winner.surname()}">Winner Full Name</span></p>
+                     <p><strong>Winning Price:</strong> €<span th:text="${#numbers.formatDecimal(auction.winningPrice(),1,2,'COMMA')}">0.00</span></p>
+                     <p><strong>Shipping Address:</strong> <span th:text="${winner.shippingAddress()}">Winner's Shipping Address</span></p>
+                 </div>
+                 <div th:if="${winner == null}">
+                    <p>This auction closed without a winner (no valid bids were placed, or the winner account was deleted).</p>
+                 </div>
+            </section>
+        </div>
+
+
+        <div th:if="${auction == null and errorMessage == null}">
+            <p class="error-message">Auction details could not be loaded or auction does not exist.</p>
+        </div>
+
+        <p><a th:href="@{/HomeServlet}" class="button-link secondary">Back to Home</a></p>
+
+
+    </main>
+
+</div> 
+</body>
+</html>

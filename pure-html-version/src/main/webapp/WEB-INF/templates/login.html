@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Online Auctions</title>
+    <!-- Link to the shared stylesheet for consistent styling. -->
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/style.css}" />
+</head>
+<!-- Apply a specific class to the body for centering the login form. -->
+<body class="login-body">
+
+<!--
+  Container for the login form.
+  This div helps in centering the form on the page and applying specific styling.
+-->
+<div class="login-container">
+    <!-- Main heading for the login page. -->
+    <h1>Online Auction System</h1>
+
+    <!--
+      Error message display area.
+      This div is conditionally displayed if an 'errorMessage' is present in the Thymeleaf context.
+      The 'th:if' attribute checks for the presence and non-emptiness of 'errorMessage'.
+      The 'th:text' attribute sets the text content of this div to the value of 'errorMessage'.
+      The 'message-base' and 'error-message' classes are for styling.
+    -->
+    <div th:if="${errorMessage != null and not #strings.isEmpty(errorMessage)}"
+         class="message-base error-message"
+         th:text="${errorMessage}">
+        <!-- Placeholder text for design view, replaced by Thymeleaf at runtime. -->
+        Error message will appear here.
+    </div>
+
+    <!--
+      Login form.
+      - 'action': Specifies the servlet to handle the form submission (LoginServlet).
+      - 'method': Uses POST for securely sending credentials.
+      - 'aria-labelledby': Associates the form with a label for accessibility (though 'loginFormLabel' is not explicitly defined here, good practice for complex forms).
+    -->
+    <form action="LoginServlet" method="POST" aria-labelledby="loginForm">
+        <!-- Username input field group. -->
+        <div>
+            <label for="username">Username:</label>
+            <!--
+              Input field for the username.
+              - 'type="text"': Standard text input.
+              - 'name="username"': Name used by the servlet to retrieve the value.
+              - 'id="username"': Links the label to this input field.
+              - 'required="required"': HTML5 validation for a non-empty field.
+              - 'aria-required="true"': Accessibility attribute indicating the field is required.
+              - 'autocomplete="username"': Browser hint for autofilling username.
+            -->
+            <input type="text" name="username" id="username" required="required" aria-required="true" autocomplete="username"/>
+        </div>
+        <!-- Password input field group. -->
+        <div>
+            <label for="password">Password:</label>
+            <!--
+              Input field for the password.
+              - 'type="password"': Masks the input.
+              - 'name="password"': Name used by the servlet to retrieve the value.
+              - 'id="password"': Links the label to this input field.
+              - 'required="required"': HTML5 validation.
+              - 'aria-required="true"': Accessibility.
+              - 'autocomplete="current-password"': Browser hint for autofilling current password.
+            -->
+            <input type="password" name="password" id="password" required="required" aria-required="true" autocomplete="current-password"/>
+        </div>
+        <!-- Submit button group. -->
+        <div>
+            <input type="submit" value="Login" />
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

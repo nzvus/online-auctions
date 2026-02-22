@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sell Page - Online Auctions</title>
+    <!-- Link to the shared stylesheet. -->
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/style.css}" />
+</head>
+<body>
+<!-- Main container for the page content. -->
+<div class="container">
+    <!--
+      Page header with title and user navigation.
+      Conditionally rendered if the user is logged in.
+    -->
+    <header>
+        <h1>Sell Your Items</h1>
+        <div class="user-info" th:if="${session.user != null}">
+            Welcome, <span th:text="${session.user.name()}">User</span>!
+            <nav>
+                <a th:href="@{/HomeServlet}">Home</a>
+                <a th:href="@{/BuyPageServlet}">Buy</a>
+                <a th:href="@{/LogoutServlet}">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content area for the Sell page. -->
+    <main>
+        <!-- Display area for error messages. -->
+        <p th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></p>
+        <!-- Display area for success messages. -->
+        <p th:if="${successMessage}" class="success-message" th:text="${successMessage}"></p>
+
+        <!--
+          Section for the "Create New Item" form.
+        -->
+        <section class="create-form">
+            <h2>Create New Item</h2>
+            <!--
+              Form to create a new item.
+              - 'action': Submits to CreateItemServlet.
+              - 'method': POST.
+              - 'enctype="multipart/form-data"': Necessary for file uploads (item image).
+            -->
+            <form action="CreateItemServlet" method="POST" enctype="multipart/form-data">
+                <div>
+                    <label for="itemCode">Item Code:</label>
+                    <input type="text" id="itemCode" name="itemCode" required="required" />
+                </div>
+                <div>
+                    <label for="itemName">Item Name:</label>
+                    <input type="text" id="itemName" name="itemName" required="required" />
+                </div>
+                <div>
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" required="required"></textarea>
+                </div>
+                <div>
+                    <label for="image">Image:</label>
+                    <!--
+                      File input for the item image.
+                      'accept="image/*"': Suggests to the browser to filter for image files.
+                    -->
+                    <input type="file" id="image" name="image" accept="image/*" required="required" />
+                </div>
+                <div>
+                    <label for="basePrice">Base Price (€):</label>
+                    <!--
+                      Number input for base price.
+                      'min="0.01"': Ensures price is positive.
+                      'step="0.01"': Allows for cents.
+                    -->
+                    <input type="number" id="basePrice" name="basePrice" min="0.01" step="0.01" required="required" />
+                </div>
+                <div>
+                    <input type="submit" value="Create Item" />
+                </div>
+            </form>
+        </section>
+
+        <!--
+          Section for the "Create New Auction" form.
+        -->
+        <section class="create-form">
+            <h2>Create New Auction</h2>
+            <!--
+              Conditional display: If no items are available for auction, show a message.
+              'th:if="${availableItems == null or availableItems.isEmpty()}"'
+            -->
+            <div th:if="${availableItems == null or availableItems.isEmpty()}">
+                <p>You have no available items to put up for auction. Please create an item first.</p>
+            </div>
+            <!--
+              Auction creation form. Rendered only if there are available items.
+              'th:if="${not (availableItems == null or availableItems.isEmpty())}"'
+              - 'action': Submits to CreateAuctionServlet.
+              - 'method': POST.
+            -->
+            <form action="CreateAuctionServlet" method="POST" th:if="${not (availableItems == null or availableItems.isEmpty())}">
+                <div>
+                    <label for="itemIds">Select Items for Auction (Hold Ctrl/Cmd to select multiple):</label>
+                    <!--
+                      Multiple-select input for choosing items.
+                      'size="5"': Shows 5 items at a time in the list.
+                    -->
+                    <select id="itemIds" name="itemIds" multiple="multiple" required="required" size="5">
+                        <!--
+                          Iterate over 'availableItems' to create options.
+                          'th:each="item : ${availableItems}"'
+                          'th:value="${item.id()}"': Sets the option value to the item's ID.
+                          'th:text': Displays item name, code, and formatted base price.
+                        -->
+                        <option th:each="item : ${availableItems}"
+                                th:value="${item.id()}"
+                                th:text="${item.name()} + ' (Code: ' + ${item.itemCode()} + ', Base Price: €' + ${#numbers.formatDecimal(item.basePrice(),1,2,'COMMA')} + ')'">
+                            Item Name <!-- Placeholder for design view. -->
+                        </option>
+                    </select>
+                    <!-- Preview table of available items for better user experience. -->
+                    <h4>Available Items Preview:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Base Price</th>
+                                <th>Image</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${availableItems}">
+                                <td th:text="${item.itemCode()}">ITM001</td>
+                                <td th:text="${item.name()}">Sample Item</td>
+                                <td th:text="'€' + ${#numbers.formatDecimal(item.basePrice(),1,2,'COMMA')}">€10.00</td>
+                                <!-- Display item image thumbnail. -->
+                                <td><img th:if="${item.image != null && item.image.length > 0}" th:src="'data:image/jpeg;base64,' + ${item.getBase64Image()}" alt="Item Image" width="50" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <label for="minIncrement">Minimum Bid Increment (€):</label>
+                    <!--
+                      Number input for minimum bid increment.
+                      'min="1" step="1"': Ensures it's a positive integer, as per specification.
+                    -->
+                    <input type="number" id="minIncrement" name="minIncrement" min="1" step="1" required="required" />
+                </div>
+                <div>
+                    <label for="deadline">Deadline (Date and Time):</label>
+                    <!-- Input for auction deadline. Type 'datetime-local' provides a date/time picker. -->
+                    <input type="datetime-local" id="deadline" name="deadline" required="required" />
+                </div>
+                <div>
+                    <input type="submit" value="Create Auction" />
+                </div>
+            </form>
+        </section>
+
+        <!--
+          Section to display the user's open auctions.
+        -->
+        <section class="auction-list">
+            <h2>Your Open Auctions</h2>
+            <p>(Ordered by creation date, oldest first)</p>
+            <!-- Conditional message if no open auctions. -->
+            <div th:if="${openAuctions == null or openAuctions.isEmpty()}">
+                <p>You have no open auctions.</p>
+            </div>
+            <!-- Table for open auctions. -->
+            <table th:if="${not (openAuctions == null or openAuctions.isEmpty())}">
+                <thead>
+                    <tr>
+                        <th>Auction ID</th>
+                        <th>Items (Name and Code)</th>
+                        <th>Current Max Bid</th>
+                        <th>Time Remaining</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--
+                      Iterate over 'openAuctions'.
+                      Row is clickable, navigating to AuctionDetailServlet.
+                    -->
+                    <tr th:each="auction : ${openAuctions}" th:onclick="'window.location.href=\'' + @{/AuctionDetailServlet(auctionId=${auction.id()})} + '\''" style="cursor: pointer;">
+                        <td th:text="${auction.id()}">1</td>
+                        <td>
+                            <!-- List items in the auction. Fetched via itemDAO. -->
+                            <ul>
+                                <li th:each="item : ${itemDAO.findItemsByAuctionId(auction.id())}"
+                                    th:text="${item.name()} + ' (Code: ' + ${item.itemCode()} + ')'">Item Name (Code: CODE)</li>
+                            </ul>
+                        </td>
+                        <!--
+                          Display the highest bid. Fetched via bidDAO.
+                          Shows "No bids yet" if no bids.
+                        -->
+                        <td th:text="${bidDAO.findHighestBidForAuction(auction.id()) != null ? '€' + #numbers.formatDecimal(bidDAO.findHighestBidForAuction(auction.id()).amount(),1,2,'COMMA') : 'No bids yet'}">€0.00</td>
+                        <!-- Display time remaining until deadline. -->
+                        <td th:text="${dateTimeUtils.getTimeRemaining(loginTimestamp, auction.deadline())}">Time left</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!--
+          Section to display the user's closed auctions.
+        -->
+        <section class="auction-list">
+            <h2>Your Closed Auctions</h2>
+            <p>(Ordered by creation date, oldest first)</p>
+            <!-- Conditional message if no closed auctions. -->
+            <div th:if="${closedAuctions == null or closedAuctions.isEmpty()}">
+                <p>You have no closed auctions.</p>
+            </div>
+            <!-- Table for closed auctions. -->
+            <table th:if="${not (closedAuctions == null or closedAuctions.isEmpty())}">
+                <thead>
+                    <tr>
+                        <th>Auction ID</th>
+                        <th>Items (Name and Code)</th>
+                        <th>Winning Price</th>
+                        <th>Winner</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--
+                      Iterate over 'closedAuctions'.
+                      Row is clickable, navigating to AuctionDetailServlet.
+                    -->
+                    <tr th:each="auction : ${closedAuctions}" th:onclick="'window.location.href=\'' + @{/AuctionDetailServlet(auctionId=${auction.id()})} + '\''" style="cursor: pointer;">
+                        <td th:text="${auction.id()}">2</td>
+                        <td>
+                            <!-- List items in the auction. -->
+                            <ul>
+                                 <li th:each="item : ${itemDAO.findItemsByAuctionId(auction.id())}"
+                                    th:text="${item.name()} + ' (Code: ' + ${item.itemCode()} + ')'">Item Name (Code: CODE)</li>
+                            </ul>
+                        </td>
+                        <!--
+                          Display winning price. Shows "N/A" if no winning price (e.g., no winner).
+                        -->
+                        <td th:text="${auction.winningPrice() != null ? '€' + #numbers.formatDecimal(auction.winningPrice(),1,2,'COMMA') : 'N/A'}">€0.00</td>
+                        <!--
+                          Display winner's username. Fetched via userDAO.
+                          Shows "No Winner" if no winner or winner details not found.
+                        -->
+                        <td th:text="${auction.winnerUserId() != null and userDAO.findUserById(auction.winnerUserId()) != null ? userDAO.findUserById(auction.winnerUserId()).username() : 'No Winner'}">Winner User</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div> <!-- End of container -->
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Online Auctions RIA</title>
+    <link rel="stylesheet" type="text/css" href="CSS/style.css" />
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="page-title">Loading...</h1> 
+            <div class="user-info" id="user-info-header">
+            </div>
+        </header>
+
+        <main>
+            <div id="messages-container" style="display:none;">
+            </div>
+            <!-- Main Content Area -->
+            <div id="main-content-area">
+                <!--placeholders initially hidden via CSS or inline style-->
+                <div id="buy-view" class="view-container" style="display:none;">
+                </div>
+                <div id="sell-view" class="view-container" style="display:none;">
+                </div>
+                <div id="auction-detail-view" class="view-container" style="display:none;">
+                </div>
+                <div id="offer-view" class="view-container" style="display:none;">
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!--'defer' attribute ensures they execute after the DOM is parsed.-->
+    <script src="js/utils.js" defer></script>
+    <script src="js/buyPage.js" defer></script>
+    <script src="js/sellPage.js" defer></script>
+    <script src="js/auctionDetail.js" defer></script>
+    <script src="js/offer.js" defer></script>
+    <script src="js/appOrchestrator.js" defer></script>
+</body>
+</html>

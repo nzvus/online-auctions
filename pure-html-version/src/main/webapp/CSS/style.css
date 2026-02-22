@@ -1,0 +1,494 @@
+/*
+  Online Auctions Application Stylesheet
+  File: style.css
+  Version: 1.0
+  Date: 2024-05-29
+
+  This stylesheet provides the visual styling for the Online Auctions web application.
+  It includes global resets, typography, layout containers, form styling, table styling,
+  and specific styles for different page components and message displays.
+*/
+
+/* --- Global Resets and Base Styles --- */
+/*
+  Resets default browser margins and padding for html and body.
+  Sets a base font family, background color, text color, and line height for the entire document.
+*/
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif; /* A common, widely available sans-serif font stack. */
+    background-color: #f4f4f4; /* Light grey background for the page. */
+    color: #333; /* Dark grey text color for good readability. */
+    line-height: 1.6; /* Standard line height for text blocks. */
+}
+
+/*
+  Specific body style for the login page.
+  Uses flexbox to center the login container vertically and horizontally on the page.
+*/
+.login-body {
+    display: flex;
+    justify-content: center; /* Center horizontally. */
+    align-items: center;   /* Center vertically. */
+    height: 100vh;         /* Full viewport height. */
+}
+
+/* --- Layout Containers --- */
+/*
+  Main content container for most pages.
+  Sets a maximum width, centers the container on the page, and adds padding and a subtle shadow.
+*/
+.container {
+    width: 90%; /* Responsive width. */
+    max-width: 1200px; /* Maximum width to maintain readability on large screens. */
+    margin: 20px auto; /* Top/bottom margin and auto left/right for centering. */
+    padding: 20px;
+    background-color: #ffffff; /* White background for the content area. */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* Soft shadow for depth. */
+    border-radius: 8px; /* Rounded corners for a modern look. */
+}
+
+/* --- Header and Navigation --- */
+/*
+  Styling for the page header (not used on the login page).
+  Includes a bottom border and uses flexbox for alignment of title and user info/nav.
+*/
+header {
+    border-bottom: 1px solid #e0e0e0; /* Light grey border at the bottom. */
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+    display: flex; /* Enable flexbox layout. */
+    justify-content: space-between; /* Space out title and user-info. */
+    align-items: center; /* Align items vertically. */
+}
+
+/* Main page title within the header. */
+header h1 {
+    margin: 0; /* Remove default margin. */
+    color: #0056b3; /* Dark blue color for the main title. */
+    font-size: 2em; /* Larger font size for prominence. */
+}
+
+/*
+  User information block, typically in the header.
+  Displays welcome message and navigation links.
+*/
+.user-info {
+    font-size: 0.95em;
+    color: #555; /* Slightly lighter text color. */
+    text-align: right; /* Align text to the right. */
+}
+.user-info span { /* Style for the user's name within the welcome message. */
+    font-weight: bold;
+}
+
+/* Navigation links within the user-info block. */
+nav {
+    margin-top: 5px;
+}
+nav a {
+    margin-left: 15px; /* Spacing between navigation links. */
+    text-decoration: none;
+    color: #007bff; /* Standard blue for links. */
+    font-weight: bold;
+    padding: 5px 10px; /* Padding for better clickability. */
+    border-radius: 4px; /* Rounded corners for link "buttons". */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for hover effects. */
+}
+nav a:hover, nav a.active { /* Style for hovered or active navigation links. */
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+}
+
+/* --- Login Page Specifics --- */
+/*
+  Styling for the login form container.
+  Distinct from the general '.container' for specific login page layout needs.
+*/
+.login-container {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Slightly more pronounced shadow. */
+    padding: 2rem; /* Generous padding. */
+    text-align: center; /* Center align text and form elements within. */
+    width: 100%;
+    max-width: 400px; /* Constrain width for a typical login form size. */
+    margin: 0; /* Reset margin as centering is handled by 'login-body'. */
+}
+
+/* Title within the login container. */
+.login-container h1 {
+    margin-bottom: 1.5rem;
+    color: #007BFF; /* Consistent blue color. */
+    font-size: 1.8em;
+}
+
+/* --- Section Titles --- */
+/*
+  Styling for main section titles (h2) and sub-section titles (h3) within the main content area.
+*/
+main h2, main h3 {
+    color: #333;
+    border-bottom: 2px solid #007bff; /* Blue underline for h2. */
+    padding-bottom: 8px;
+    margin-top: 30px; /* Space above titles. */
+    margin-bottom: 20px; /* Space below titles. */
+    font-size: 1.5em;
+}
+main h3 { /* Sub-section titles are slightly smaller with a thinner underline. */
+    font-size: 1.3em;
+    border-bottom-width: 1px;
+}
+
+/* --- Tables --- */
+/*
+  General styling for tables.
+  Applies to all tables unless overridden by more specific selectors.
+*/
+table {
+    width: 100%; /* Tables take full available width. */
+    border-collapse: collapse; /* Removes space between cell borders. */
+    margin-bottom: 25px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Subtle shadow. */
+    border-radius: 6px; /* Rounded corners for the table. */
+    overflow: hidden; /* Ensures content respects rounded corners. */
+    table-layout: fixed; /* Helps with consistent column widths and word wrapping. */
+}
+
+/* Styling for table header cells (th) and data cells (td). */
+th, td {
+    border: 1px solid #e0e0e0; /* Light grey border for cells. */
+    padding: 12px 15px; /* Padding within cells. */
+    text-align: left; /* Align text to the left. */
+    vertical-align: middle; /* Vertically align content in the middle. */
+    word-break: break-word; /* Allow long words to break to prevent overflow. */
+    overflow-wrap: break-word; /* Alternative for word breaking. */
+}
+
+/* Styling for table header cells. */
+th {
+    background-color: #f0f2f5; /* Very light grey background for headers. */
+    font-weight: 600; /* Bolder text for headers. */
+    color: #333;
+}
+
+/* Alternating row colors (zebra striping) for better readability. */
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+/* Hover effect for table rows. */
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Styling for images within table cells. */
+td img {
+    max-width: 100px;    /* Default max-width to prevent overly large images. */
+    height: auto;        /* Maintain aspect ratio. */
+    border-radius: 4px;  /* Slightly rounded corners for images. */
+    display: block;      /* Allows for margin auto centering. */
+    margin-left: auto;   /* Center image if cell is wider than image. */
+    margin-right: auto;
+}
+
+/* Styling for unordered lists within table cells. */
+td ul {
+    padding-left: 20px; /* Indent list items. */
+    margin: 0; /* Remove default list margins. */
+}
+td ul li {
+    padding: 2px 0; /* Small padding for list items. */
+    border-bottom: none; /* Remove any inherited bottom borders. */
+}
+
+/* --- Specific Table Styles (e.g., for Item Details in AuctionDetail) --- */
+/*
+  Column width adjustments for the item details table within the '.items-card' section.
+  This provides more control over the layout of this specific table.
+*/
+.items-card .item-table-details th:nth-child(1), /* Item Code column */
+.items-card .item-table-details td:nth-child(1) {
+    width: 15%;
+}
+.items-card .item-table-details th:nth-child(2), /* Name column */
+.items-card .item-table-details td:nth-child(2) {
+    width: 20%;
+}
+.items-card .item-table-details th:nth-child(3), /* Description column */
+.items-card .item-table-details td:nth-child(3) {
+    width: 35%;
+}
+.items-card .item-table-details th:nth-child(4), /* Image column */
+.items-card .item-table-details td:nth-child(4) {
+    width: 30%;
+    text-align: center; /* Center align image column content. */
+}
+
+/* Padding adjustment for cells in the item details table. */
+.items-card .item-table-details td,
+.items-card .item-table-details th {
+    padding: 8px 10px;
+}
+
+/* Ensure long descriptions wrap correctly. */
+.items-card .item-table-details .item-description {
+    white-space: normal; /* Allow text to wrap. */
+}
+
+/* Thumbnail style for images in the item details card. */
+.items-card .item-thumbnail {
+    max-width: 100%;    /* Image responsive within its cell. */
+    height: auto;
+    max-height: 120px;  /* Limit height to prevent overly tall images. */
+    border-radius: 4px;
+    display: block;
+    margin: auto;       /* Center image. */
+}
+
+/* --- Forms --- */
+/* General styling for forms. */
+form {
+    background-color: #fdfdfd; /* Slightly off-white background for forms. */
+    padding: 25px;
+    border: 1px solid #e0e0e0; /* Light border. */
+    border-radius: 6px;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07); /* Subtle shadow. */
+}
+
+/* Margin for form field groups (divs containing label and input). */
+form div {
+    margin-bottom: 1rem;
+}
+
+/* Styling for form labels. */
+form label {
+    display: block; /* Labels take full width. */
+    margin-bottom: 0.5rem; /* Space below label. */
+    font-weight: 500; /* Semi-bold labels. */
+    color: #454545;
+}
+/* Specific label style for login form for more emphasis. */
+.login-container form label {
+    font-weight: bold;
+}
+
+/* Styling for various input types, textareas, and select elements. */
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="datetime-local"],
+input[type="file"],
+textarea,
+select {
+    width: 100%; /* Inputs take full width of their container. */
+    padding: 10px;
+    margin-bottom: 15px; /* Space below input fields. */
+    border: 1px solid #ccc; /* Standard grey border. */
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height. */
+    font-size: 1em;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions for focus state. */
+}
+
+/* Focus state for input fields. */
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="datetime-local"]:focus,
+input[type="file"]:focus,
+textarea:focus,
+select:focus {
+    border-color: #007bff; /* Blue border on focus. */
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); /* Subtle blue glow. */
+    outline: none; /* Remove default browser outline. */
+}
+
+/* Styling for textareas. */
+textarea {
+    min-height: 100px; /* Minimum height for textareas. */
+    resize: vertical;   /* Allow vertical resizing only. */
+}
+
+/* Specific padding for file inputs. */
+input[type="file"] {
+    padding: 8px;
+}
+
+/* --- Buttons --- */
+/*
+  General styling for submit buttons, generic buttons, and anchor tags styled as buttons.
+*/
+input[type="submit"],
+button,
+a.button-link { /* Class for anchor tags that should look like buttons. */
+    background-color: #007bff; /* Primary blue background. */
+    color: white;
+    padding: 12px 22px; /* Generous padding. */
+    border: none; /* No border. */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    text-transform: uppercase; /* Uppercase text for buttons. */
+    letter-spacing: 0.5px; /* Slight letter spacing. */
+    transition: background-color 0.3s ease, transform 0.1s ease; /* Smooth transitions. */
+    display: inline-block; /* Allows setting margin/padding. */
+    text-align: center;
+    text-decoration: none; /* Remove underline from anchor "buttons". */
+    margin-top: 10px; /* Space above buttons. */
+}
+
+/* Specific styling for submit button in the login container (full width). */
+.login-container input[type="submit"] {
+    width: 100%;
+    padding: 0.75rem;
+}
+
+/* Hover state for buttons. */
+input[type="submit"]:hover,
+button:hover,
+a.button-link:hover {
+    background-color: #0056b3; /* Darker blue on hover. */
+    transform: translateY(-1px); /* Slight upward lift on hover. */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15); /* Add shadow on hover. */
+}
+
+/* Active (pressed) state for buttons. */
+input[type="submit"]:active,
+button:active,
+a.button-link:active {
+    transform: translateY(0); /* Remove lift effect. */
+    box-shadow: none; /* Remove shadow. */
+}
+
+/* Styles for secondary buttons (e.g., "Back" or "Cancel"). */
+button.secondary, input[type="submit"].secondary {
+    background-color: #6c757d; /* Grey background. */
+}
+button.secondary:hover, input[type="submit"].secondary:hover {
+    background-color: #5a6268; /* Darker grey on hover. */
+}
+
+/* Styles for danger buttons (e.g., "Close Auction" or "Delete"). */
+button.danger, input[type="submit"].danger {
+    background-color: #dc3545; /* Red background. */
+}
+button.danger:hover, input[type="submit"].danger:hover {
+    background-color: #c82333; /* Darker red on hover. */
+}
+
+/* --- Messages (Error/Success) --- */
+/* Base styling for message boxes. */
+.message-base {
+    padding: 15px;
+    border: 1px solid transparent; /* Border color set by specific message type. */
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 0.95em;
+    text-align: center;
+}
+/* Styling for error messages. */
+.error-message {
+    color: #721c24; /* Dark red text. */
+    background-color: #f8d7da; /* Light red background. */
+    border-color: #f5c6cb; /* Reddish border. */
+}
+/* Styling for success messages. */
+.success-message {
+    color: #155724; /* Dark green text. */
+    background-color: #d4edda; /* Light green background. */
+    border-color: #c3e6cb; /* Greenish border. */
+}
+
+/* --- Section Specificity (Buy/Sell/Detail pages) --- */
+/* Margin for specific content sections. */
+.search-form, .create-form, .auction-list, .won-auctions-list {
+    margin-bottom: 30px;
+}
+
+/*
+  Grid layout for the auction detail page.
+  Uses CSS Grid to arrange information cards.
+  Responsive: switches to single column on smaller screens.
+*/
+.auction-details-grid {
+    display: grid;
+    /*
+      Creates responsive columns. Each column will be at least 320px wide.
+      If there's more space, columns will expand equally.
+    */
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 25px; /* Gap between grid items. */
+    margin-bottom: 20px;
+}
+
+/*
+  Styling for individual cards within the auction details grid.
+  (e.g., auction info, items, bids, winner, actions).
+*/
+.auction-info-card, .items-card, .bids-card, .winner-card, .action-card {
+    background-color: #fdfdfd;
+    padding: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    grid-column: span 1; /* Default: each card spans one column. */
+}
+
+/*
+  The items card in auction details spans all columns of the grid
+  to provide more horizontal space for the items table.
+  'grid-column: 1 / -1;' makes it span from the first to the last grid line.
+*/
+.items-card {
+    grid-column: 1 / -1; /* Span full width of the grid container. */
+}
+
+/* Styling for lists within the items card (if not using a table). */
+.items-card ul {
+    list-style: none; /* Remove default list bullets. */
+    padding-left: 0; /* Remove default list indentation. */
+}
+.items-card li {
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee; /* Dashed line separator for list items. */
+}
+.items-card li:last-child { /* Remove border from the last list item. */
+    border-bottom: none;
+}
+
+/* --- Footer --- */
+/* Basic styling for the page footer. */
+footer {
+    text-align: center;
+    margin-top: 40px; /* Space above the footer. */
+    padding-top: 20px; /* Space within the footer, above the border. */
+    border-top: 1px solid #e0e0e0; /* Top border to separate from content. */
+    font-size: 0.9em;
+    color: #6c757d; /* Grey text color for footer. */
+}
+
+/* --- Responsive Design Adjustments --- */
+/*
+  Media query for tablet-sized screens and smaller.
+  Makes the auction details grid single-column.
+*/
+@media (max-width: 768px) {
+    .auction-details-grid {
+        grid-template-columns: 1fr; /* Single column layout. */
+    }
+}
+
+/*
+  Media query for small mobile screens.
+  Reduces padding in the login container for better fit.
+*/
+@media (max-width: 480px) {
+    .login-container {
+        padding: 1rem; /* Less padding on very small screens. */
+    }
+}

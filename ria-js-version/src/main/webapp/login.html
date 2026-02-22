@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Online Auctions</title>
+    <!-- Link to the shared stylesheet. -->
+    <link rel="stylesheet" type="text/css" href="CSS/style.css" />
+
+</head>
+
+<body class="login-body">
+
+
+<div class="login-container">
+    <!-- Main title for the login page. -->
+    <h1>Online Auction System</h1>
+
+
+    <div id="login-error-message" class="message-base error-message" style="display:none;">
+    </div>
+
+
+    <form id="loginForm" aria-labelledby="loginFormLabel">
+
+        <div>
+            <label for="username">Username:</label>
+
+            <input type="text" name="username" id="username" required="required" aria-required="true" autocomplete="username"/>
+        </div>
+
+        <div>
+            <label for="password">Password:</label>
+
+            <input type="password" name="password" id="password" required="required" aria-required="true" autocomplete="current-password"/>
+        </div>
+
+        <div>
+            <input type="submit" value="Login" />
+        </div>
+    </form>
+</div>
+
+
+<script src="js/utils.js" defer></script>
+<script src="js/login.js" defer></script>
+</body>
+</html>

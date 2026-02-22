@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home - Online Auctions</title>
+    <!-- Link to the shared stylesheet. -->
+    <link rel="stylesheet" type="text/css" th:href="@{/CSS/style.css}" />
+</head>
+<body>
+<!--
+  Main container for the page content.
+-->
+<div class="container">
+    <!--
+      Page header section.
+      Contains the main title and user-specific information/navigation if the user is logged in.
+    -->
+    <header>
+        <!-- Page title. -->
+        <h1>Welcome to Online Auctions</h1>
+        <!--
+          User information and navigation links.
+          This section is displayed if a 'user' object is present in the session (handled by Thymeleaf context).
+          'th:if="${session.user != null}"': Conditionally renders this div.
+        -->
+        <div class="user-info" th:if="${session.user != null}">
+            <!--
+              Welcome message displaying the user's first name.
+              'th:text="${session.user.name()}"': Dynamically inserts the user's name.
+            -->
+            Welcome, <span th:text="${session.user.name()}">User</span>!
+            <!-- Navigation links for logged-in users. -->
+            <nav>
+                <!-- Link to the Buy page. 'th:href' generates a context-aware URL. -->
+                <a th:href="@{/BuyPageServlet}">Buy</a>
+                <!-- Link to the Sell page. -->
+                <a th:href="@{/SellPageServlet}">Sell</a>
+                <!-- Link to the Logout servlet. -->
+                <a th:href="@{/LogoutServlet}">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!--
+      Main content area of the home page.
+      This section could be populated with general information, featured auctions, etc.
+      For this basic home page, it's kept simple as navigation is the primary focus.
+      Further content would go here.
+    -->
+    <main>
+        <!-- Placeholder for any specific content related to the home page after login. -->
+        <!-- For example, quick links, summaries, or featured items could be added here. -->
+        <!-- Currently, this page primarily serves as a landing page with navigation. -->
+    </main>
+
+</div> <!-- End of container -->
+</body>
+</html>
